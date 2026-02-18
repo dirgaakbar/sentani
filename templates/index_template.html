@@ -3,68 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DJJ Flight Board - Sentani Airport</title>
+    <title>Jadwal Penerbangan Bandara Sentani (DJJ)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Inter', sans-serif; }
-        .board-container { margin-top: 50px; border: 2px solid #30363d; border-radius: 12px; background: #161b22; overflow: hidden; }
-        .board-header { background: #21262d; padding: 20px; border-bottom: 2px solid #30363d; }
-        .airport-code { color: #58a6ff; font-family: 'JetBrains Mono', monospace; font-weight: bold; }
-        .table { margin-bottom: 0; color: #c9d1d9; vertical-align: middle; }
-        .table thead th { background: #161b22; border-bottom: 1px solid #30363d; color: #8b949e; text-transform: uppercase; font-size: 0.8rem; }
-        .flight-no { color: #f2cc60; font-family: 'JetBrains Mono', monospace; font-weight: bold; }
-        .status-badge { padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-        .bg-departed { background: #3e2223; color: #ff7b72; border: 1px solid #6e3630; }
-        .bg-scheduled { background: #21262d; color: #58a6ff; border: 1px solid #388bfd; }
-        .footer-info { padding: 15px; font-size: 0.8rem; color: #8b949e; background: #0d1117; }
+        :root { --bg-dark: #0f172a; --card-bg: #1e293b; --accent: #388bfd; }
+        body { background-color: var(--bg-dark); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; padding-bottom: 50px; }
+        
+        /* Hero Section */
+        .hero-section { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 40px 0; border-bottom: 1px solid #334155; margin-bottom: 30px; }
+        .hero-badge { background: rgba(56, 139, 253, 0.1); color: var(--accent); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
+        
+        /* Info Cards */
+        .stat-card { background: var(--card-bg); border: 1px solid #334155; border-radius: 12px; padding: 20px; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-5px); }
+        
+        /* Flight Board */
+        .board-container { background: var(--card-bg); border-radius: 16px; border: 1px solid #334155; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .table { margin-bottom: 0; }
+        .table thead th { background: #1e293b; border-bottom: 2px solid #334155; color: #94a3b8; font-size: 0.75rem; letter-spacing: 1px; }
+        .table td { vertical-align: middle; border-bottom: 1px solid #334155; padding: 15px; }
+        
+        .flight-code { font-family: 'JetBrains Mono', monospace; color: #fbbf24; font-weight: bold; }
+        .dest-text { font-weight: 600; color: #f8fafc; }
+        
+        /* Status Badges */
+        .status-pill { padding: 4px 12px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; }
+        .status-departed { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .status-scheduled { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+        
+        .footer-text { color: #64748b; font-size: 0.85rem; margin-top: 40px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="board-container shadow-lg">
-            <div class="board-header d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="m-0 h4">DEPARTURES / KEBERANGKATAN</h2>
-                    <span class="airport-code">SENTANI INTL - DJJ</span>
+
+    <header class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <span class="hero-badge mb-2 d-inline-block">Live Flight Information</span>
+                    <h1 class="display-5 fw-bold mb-3">Bandar Udara Internasional Sentani (DJJ)</h1>
+                    <p class="lead text-secondary">Pantau jadwal keberangkatan pesawat secara real-time. Data diperbarui otomatis setiap hari menggunakan automasi Python.</p>
                 </div>
-                <div class="text-end">
-                    <div class="badge bg-success mb-1">REAL-TIME DATA</div>
-                    <div class="small">Waktu Lokal: {{ last_update }}</div>
+                <div class="col-md-5 text-md-end">
+                    <div class="stat-card d-inline-block text-start">
+                        <small class="text-secondary d-block text-uppercase">Waktu Saat Ini (WIT)</small>
+                        <h3 class="fw-bold m-0 text-info">{{ last_update.split(',')[1] }}</h3>
+                        <small class="text-muted">{{ last_update.split(',')[0] }}</small>
+                    </div>
                 </div>
             </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="stat-card">
+                    <h6 class="text-secondary">Lokasi Bandara</h6>
+                    <p class="m-0 fw-bold">Jayapura, Papua (DJJ)</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stat-card border-start border-info border-4">
+                    <h6 class="text-secondary">Total Penerbangan Hari Ini</h6>
+                    <p class="m-0 fw-bold">{{ flights|length }} Pesawat Terjadwal</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stat-card">
+                    <h6 class="text-secondary">Status Update</h6>
+                    <p class="m-0 fw-bold text-success">● Automasi Aktif</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="board-container">
+            <div class="p-3 bg-dark d-flex justify-content-between align-items-center">
+                <h5 class="m-0 fw-bold">Jadwal Keberangkatan (Departures)</h5>
+                <small class="text-muted italic">Keterangan: Waktu yang tertera adalah Waktu Indonesia Timur (WIT)</small>
+            </div>
             <div class="table-responsive">
-                <table class="table table-dark table-hover">
+                <table class="table table-dark">
                     <thead>
                         <tr>
-                            <th>Flight</th>
-                            <th>Airline</th>
-                            <th>Destination</th>
-                            <th>Time</th>
-                            <th>Status</th>
+                            <th>NO. PENERBANGAN</th>
+                            <th>MASKAPAI</th>
+                            <th>TUJUAN</th>
+                            <th>JAM</th>
+                            <th>STATUS</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for flight in flights %}
                         <tr>
-                            <td class="flight-no">{{ flight.flight_no }}</td>
-                            <td>{{ flight.airline }}</td>
-                            <td>{{ flight.destination }}</td>
-                            <td>{{ flight.time }}</td>
+                            <td class="flight-code">{{ flight.flight_no }}</td>
                             <td>
-                                <span class="status-badge {{ 'bg-departed' if flight.status == 'DEPARTED' else 'bg-scheduled' }}">
-                                    {{ flight.status }}
-                                </span>
+                                <div class="d-flex align-items-center">
+                                    <span>{{ flight.airline }}</span>
+                                </div>
+                            </td>
+                            <td class="dest-text text-uppercase">{{ flight.destination }}</td>
+                            <td class="fw-bold">{{ flight.time }}</td>
+                            <td>
+                                {% if flight.status == 'DEPARTED' %}
+                                <span class="status-pill status-departed">TELAH BERANGKAT</span>
+                                {% else %}
+                                <span class="status-pill status-scheduled">TERJADWAL</span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            <div class="footer-info text-center">
-                Project Portofolio - Automated with Python & GitHub Actions
-            </div>
+        </div>
+
+        <div class="footer-text text-center">
+            <hr class="border-secondary mb-4">
+            <p><strong>Proyek Portofolio Data Automation</strong></p>
+            <p>Dibuat dengan Python (Jinja2, Pandas) & Deploy otomatis via GitHub Actions.</p>
+            <p class="small text-muted">Data yang ditampilkan di atas bersifat simulasi untuk keperluan demonstrasi portofolio teknologi.</p>
         </div>
     </div>
+
 </body>
 </html>

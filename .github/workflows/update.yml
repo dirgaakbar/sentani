@@ -1,15 +1,16 @@
-name: Update Flight Board
+name: Update Jadwal Sentani Tiap Jam
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Update otomatis setiap jam 00:00 UTC (Pagi hari)
-  workflow_dispatch:      # Memungkinkan update manual via tombol di GitHub
+    # Mengatur update otomatis setiap jam (menit ke-0)
+    - cron: '0 * * * *'
+  workflow_dispatch: # Tombol manual tetap ada
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout kode
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -17,16 +18,17 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install library
+        run: |
+          pip install pandas jinja2 requests pytz
 
-      - name: Run script
+      - name: Jalankan Script Python
         run: python main.py
 
-      - name: Commit and push changes
+      - name: Unggah Perubahan ke GitHub
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Update flight data" || exit 0
-          git push
+          git commit -m "Update jadwal otomatis: $(date)" || echo "Tidak ada perubahan"
+          git push origin main
